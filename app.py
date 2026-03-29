@@ -1,4 +1,31 @@
 import streamlit as st
+import os
+import requests
+
+# Define the path where you want to save the weights
+weights_path = 'crop_weed_detection.weights' 
+# (Or 'model/crop_weed_detection.weights' if you put it in a folder)
+
+# Your copied GitHub Release URL goes here
+weights_url = 'PASTE_YOUR_COPIED_LINK_HERE' 
+
+@st.cache_resource
+def download_weights(url, save_path):
+    if not os.path.exists(save_path):
+        with st.spinner('Downloading model weights (~234MB). This might take a minute...'):
+            response = requests.get(url, stream=True)
+            with open(save_path, 'wb') as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    if chunk:
+                        f.write(chunk)
+        st.success('Weights downloaded successfully!')
+    return save_path
+
+# Run the download function before you load your model
+download_weights(weights_url, weights_path)
+
+# --- The rest of your app.py code for OpenCV/YOLO goes below here ---
+import streamlit as st
 import cv2
 import numpy as np
 import os
