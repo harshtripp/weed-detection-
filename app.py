@@ -59,7 +59,7 @@ def load_model():
     weights_path = os.path.join(base_dir, "performing_detection", "data", "weights", "crop_weed_detection.weights")
     config_path = os.path.join(base_dir, "performing_detection", "data", "cfg", "crop_weed.cfg")
 
-    net = cv2.dnn.readNet(weights_path, config_path)
+    net = cv2.dnn.readNetFromDarknet(config_path, weights_path)
     layer_names = net.getLayerNames()
     output_layers = [layer_names[i - 1] for i in net.getUnconnectedOutLayers()]
 
