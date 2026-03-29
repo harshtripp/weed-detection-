@@ -7,7 +7,7 @@ weights_path = 'crop_weed_detection.weights'
 # (Or 'model/crop_weed_detection.weights' if you put it in a folder)
 
 # Your copied GitHub Release URL goes here
-weights_url = 'PASTE_YOUR_COPIED_LINK_HERE' 
+weights_url = 'https://github.com/harshtripp/weed-detection-/releases/download/v1.0/crop_weed_detection.weights' 
 
 @st.cache_resource
 def download_weights(url, save_path):
