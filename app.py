@@ -1,12 +1,22 @@
 import streamlit as st
+import cv2
+import numpy as np
 import os
+import pandas as pd
 import requests
 
-# Define the path where you want to save the weights
-weights_path = 'crop_weed_detection.weights' 
-# (Or 'model/crop_weed_detection.weights' if you put it in a folder)
+# =========================
+# PAGE CONFIG (MUST BE FIRST)
+# =========================
+st.set_page_config(page_title="Smart Weed Detection", layout="wide")
 
-# Your copied GitHub Release URL goes here
+# =========================
+# DOWNLOAD WEIGHTS
+# =========================
+# Define the path where you want to save the downloaded weights
+weights_file_name = 'crop_weed_detection.weights' 
+
+# Your copied GitHub Release URL
 weights_url = 'https://github.com/harshtripp/weed-detection-/releases/download/v1.0/crop_weed_detection.weights' 
 
 @st.cache_resource
@@ -21,22 +31,12 @@ def download_weights(url, save_path):
         st.success('Weights downloaded successfully!')
     return save_path
 
-# Run the download function before you load your model
-download_weights(weights_url, weights_path)
-
-# --- The rest of your app.py code for OpenCV/YOLO goes below here ---
-import streamlit as st
-import cv2
-import numpy as np
-import os
-import pandas as pd
-import time
+# Run the download function before loading the model
+download_weights(weights_url, weights_file_name)
 
 # =========================
-# PAGE CONFIG
+# HEADER
 # =========================
-st.set_page_config(page_title="Smart Weed Detection", layout="wide")
-
 st.title("🌱 Smart Crop & Weed Detection System")
 st.markdown("AI-powered precision agriculture decision system")
 
@@ -56,9 +56,11 @@ show_boxes = st.sidebar.checkbox("Show Bounding Boxes", True)
 def load_model():
     base_dir = os.path.dirname(os.path.abspath(__file__))
 
-    weights_path = os.path.join(base_dir, "performing_detection", "data", "weights", "crop_weed_detection.weights")
-    config_path = os.path.join(base_dir, "performing_detection", "data", "cfg", "crop_weed.cfg")
+    # Pointing directly to the root folder
+    weights_path = os.path.join(base_dir, "crop_weed_detection.weights")
+    config_path = os.path.join(base_dir, "crop_weed.cfg")
 
+    # Correct OpenCV function for Darknet/YOLO
     net = cv2.dnn.readNetFromDarknet(config_path, weights_path)
     layer_names = net.getLayerNames()
     output_layers = [layer_names[i - 1] for i in net.getUnconnectedOutLayers()]
@@ -72,7 +74,6 @@ classes = ["crop", "weed"]
 # IMAGE MODE (MULTI IMAGE)
 # =========================
 if mode == "Image":
-
     uploaded_files = st.file_uploader(
         "📤 Upload Images",
         type=["jpg", "png", "jpeg"],
@@ -80,12 +81,10 @@ if mode == "Image":
     )
 
     if uploaded_files:
-
         total_crop = 0
         total_weed = 0
 
         for uploaded_file in uploaded_files:
-
             file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
             image = cv2.imdecode(file_bytes, 1)
             output_image = image.copy()
@@ -131,7 +130,7 @@ if mode == "Image":
                         color = (0,0,255)
 
                     if show_boxes:
-                        cv2.rectangle(output_image, (x,y),(x+w,y+h), color,2)
+                        cv2.rectangle(output_image, (x,y),(x+w,y+h), color, 2)
 
             total_crop += crop_count
             total_weed += weed_count
@@ -178,11 +177,9 @@ Recommendation: {recommendation}
 # VIDEO MODE
 # =========================
 if mode == "Video":
-
     uploaded_file = st.file_uploader("📤 Upload Video", type=["mp4","avi","mov"])
 
     if uploaded_file is not None:
-
         temp_path = "temp_video.mp4"
         with open(temp_path,"wb") as f:
             f.write(uploaded_file.read())
@@ -199,7 +196,7 @@ if mode == "Video":
 
             height, width, _ = frame.shape
 
-            blob = cv2.dnn.blobFromImage(frame,1/255.0,(512,512),swapRB=True,crop=False)
+            blob = cv2.dnn.blobFromImage(frame, 1/255.0, (512,512), swapRB=True, crop=False)
             net.setInput(blob)
             outputs = net.forward(output_layers)
 
