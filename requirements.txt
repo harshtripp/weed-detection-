@@ -29,4 +29,16 @@ torchvision==0.3.0
 
 tqdm
 
+streamlit
+opencv-python-headless
+numpy
+matplotlib
+Pillow
+requests
+scipy
+tqdm
+pandas
+seaborn
+torch
+torchvision
 
